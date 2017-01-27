@@ -1,7 +1,8 @@
 export class Goal {
 
-    name: string;
-    status: string;
-    imageUrl: string;
-    
+    private _name: string;
+    private _status: string;
+    private _imageUrl: string;
+    private _finishedOn: Date;
+    private _order: number;
 }
