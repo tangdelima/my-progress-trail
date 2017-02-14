@@ -5,21 +5,17 @@ import { Observable } from 'rxjs/Rx';
 import { Trail } from '../objects/trail';
 import { Goal } from '../objects/goal';
 
-@Injectable()
-export class TrailService {
-
-  constructor() { }
+/**
+ * Service to manage Trails and Goals.
+ */
+export interface TrailService {
 
   /**
    * Get All Trails.
    * 
    * @returns An array containing all trails.
    */
-  getTrails() : Trail[] {
-    let trails : Trail[] = [];
-
-    return trails;
-  }  
+  getTrails() : Trail[];
 
   /**
    * Finds an Trail by id.
@@ -28,11 +24,7 @@ export class TrailService {
    * 
    * @returns The trail specified or null if no trail is found. 
    */
-  getTrail(id : number) : Trail {
-    let trail : Trail = null;
-
-    return trail;
-  }
+  getTrail(id : number) : Trail;
 
   /**
    * Creates a new Trail.
@@ -41,25 +33,21 @@ export class TrailService {
    * 
    * @return A fresh and new Trail.
    */
-  createTrail(name : string) : Trail {
-    let trail : Trail = new Trail();
-    trail.name = name;
-    return trail;
-  }
+  createTrail(name : string) : Trail;
 
   /**
    * Persists a given Trail. If the trail already exists it will be updated.
    * 
    * @param The trail to be persisted. 
    */
-  saveTrail(trail : Trail) : Observable<string> { return null;}
+  saveTrail(trail : Trail) : Observable<string>;
 
   /**
    * Removes a given trail permanently.
    * 
    * @param The trail to be removed.
    */
-  deleteTrail(trail : Trail) : Observable<string> { return null;}
+  deleteTrail(trail : Trail) : Observable<string>;
 
 
   /*
@@ -74,7 +62,7 @@ export class TrailService {
    * 
    * @return A new and fresh Goal.
    */
-  createGoal(name: string, imgUrl?: string) : Goal { return null;}
+  createGoal(name: string, imgUrl?: string) : Goal;
 
   /**
    * Gets All goals from a given trail.
@@ -83,26 +71,26 @@ export class TrailService {
    * 
    * @return An array containing all goals of the given trail. Ordered by the order of execution.
    */
-  getGoals(trailId : number) : Goal[]{ return null; }
+  getGoals(trailId : number) : Goal[];
 
   /**
    * Finds all Goals.
    * 
    * @return An array with all goals in no specified order.
    */
-  getAllGoals() : Goal[]{ return null; }
+  getAllGoals() : Goal[];
 
   /**
    * Persistis a given Goal, if the goal already exists it will be updated.
    * 
    * @param The goal to be persisted.
    */
-  saveGoal(goal : Goal) : Observable<string> { return null; }
+  saveGoal(goal : Goal) : Observable<string>;
 
   /**
    * Removes a given goal permanently.
    * 
    * @param the goal to be removed.
    */
-  deleteGoal(goal : Goal) : Observable<string>{ return null; }
+  deleteGoal(goal : Goal) : Observable<string>;
 }

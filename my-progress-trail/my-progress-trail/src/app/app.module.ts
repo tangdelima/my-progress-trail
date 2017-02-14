@@ -10,8 +10,6 @@ import { ProgressListComponent } from './progress-list/progress-list.component';
 import { ProgressTrailComponent } from './progress-list/progress-trail/progress-trail.component';
 import { ProgressItemComponent } from './progress-list/progress-trail/progress-item.component';
 
-import { TrailService } from './services/trail.service';
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,7 +24,7 @@ import { TrailService } from './services/trail.service';
     FormsModule,
     HttpModule
   ],
-  providers: [TrailService],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

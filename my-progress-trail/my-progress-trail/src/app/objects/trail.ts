@@ -6,6 +6,7 @@ export class Trail {
     private _name: string;
     private _status: string;
     private _goals: Goal[];
+    private _completed : boolean;
 
     get id () : number {
         return this._id;
@@ -48,5 +49,10 @@ export class Trail {
     removeGoal(goal : Goal) : Goal{
         return this._goals.splice(this._goals.indexOf(goal))[0];
     }
+
+    evaluatesCompletion() : boolean {
+        return !this.goals.some((val:Goal)=>{ return val.finishedOn == undefined });
+    }
+    // TODO: define how trail completion shal be treated.    
 
 }
