@@ -9,6 +9,7 @@ import { HeaderComponent } from './header/header.component';
 import { ProgressListComponent } from './progress-list/progress-list.component';
 import { ProgressTrailComponent } from './progress-list/progress-trail/progress-trail.component';
 import { ProgressItemComponent } from './progress-list/progress-trail/progress-item.component';
+import { MockedService } from './services/mocked.service';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,7 @@ import { ProgressItemComponent } from './progress-list/progress-trail/progress-i
     FormsModule,
     HttpModule
   ],
-  providers: [],
+  providers: [MockedService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

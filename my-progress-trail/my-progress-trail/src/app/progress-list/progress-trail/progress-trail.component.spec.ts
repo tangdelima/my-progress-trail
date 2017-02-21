@@ -24,5 +24,6 @@ describe('ProgressTrailComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+    pending();
   });
 });

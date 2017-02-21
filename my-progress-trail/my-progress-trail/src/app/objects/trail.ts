@@ -2,11 +2,18 @@ import { Goal } from './goal';
 
 export class Trail {
 
-    private _id: number;
-    private _name: string;
-    private _status: string;
-    private _goals: Goal[];
-    private _completed : boolean;
+    private _completed : boolean = false;
+
+    constructor(
+        private _name: string,
+        private _id?: number,
+        private _status?: string,
+        private _goals?: Goal[]
+    ){
+        if (_goals) { 
+            this.evaluatesCompletion();
+        }
+    }
 
     get id () : number {
         return this._id;
@@ -36,8 +43,12 @@ export class Trail {
         return this._goals;
     }
 
-    addGoal(goal : Goal) : void{
+    addGoal(goal : Goal) : void{        
         this._goals.push();
+    }
+
+    get completed() : boolean {
+        return this._completed;
     }
     
     /**
@@ -50,9 +61,15 @@ export class Trail {
         return this._goals.splice(this._goals.indexOf(goal))[0];
     }
 
+    /**
+     * This method evaluates if the Trail instance can be considered completed by evaluating all it's goals
+     * finishedOn property. Also this method will set the completed attribute to the correct state.
+     * 
+     * @return true if all goals are finished, or false otherwise. 
+     */
     evaluatesCompletion() : boolean {
-        return !this.goals.some((val:Goal)=>{ return val.finishedOn == undefined });
-    }
-    // TODO: define how trail completion shal be treated.    
+        this._completed = !this.goals.some((val:Goal)=>{ return val.finishedOn == undefined });
+        return this._completed;
+    }    
 
 }

@@ -1,11 +1,12 @@
 export class Goal {
 
-    private _id: number;
-    private _name: string;
-    private _status: string;
-    private _imageUrl: string;
-    private _finishedOn: Date;
-    private _order: number;
+    constructor(
+        private _name: string,
+        private _id?: number,
+        private _status?: string,
+        private _imageUrl?: string,
+        private _finishedOn?: Date,
+        private _order?: number){}
 
     get id() :  number{
         return this._id;

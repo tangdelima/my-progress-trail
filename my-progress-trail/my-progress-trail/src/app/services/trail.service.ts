@@ -15,7 +15,7 @@ export interface TrailService {
    * 
    * @returns An array containing all trails.
    */
-  getTrails() : Trail[];
+  getTrails() : Observable<Trail[]>;
 
   /**
    * Finds an Trail by id.
@@ -24,7 +24,7 @@ export interface TrailService {
    * 
    * @returns The trail specified or null if no trail is found. 
    */
-  getTrail(id : number) : Trail;
+  getTrail(id : number) : Observable<Trail>;
 
   /**
    * Creates a new Trail.
@@ -40,14 +40,14 @@ export interface TrailService {
    * 
    * @param The trail to be persisted. 
    */
-  saveTrail(trail : Trail) : Observable<string>;
+  saveTrail(trail : Trail) : Observable<any>;
 
   /**
    * Removes a given trail permanently.
    * 
    * @param The trail to be removed.
    */
-  deleteTrail(trail : Trail) : Observable<string>;
+  deleteTrail(trail : Trail) : Observable<any>;
 
 
   /*
@@ -71,26 +71,26 @@ export interface TrailService {
    * 
    * @return An array containing all goals of the given trail. Ordered by the order of execution.
    */
-  getGoals(trailId : number) : Goal[];
+  getGoals(trailId : number) : Observable<Goal[]>;
 
   /**
    * Finds all Goals.
    * 
    * @return An array with all goals in no specified order.
    */
-  getAllGoals() : Goal[];
+  getAllGoals() : Observable<Goal[]>;
 
   /**
    * Persistis a given Goal, if the goal already exists it will be updated.
    * 
    * @param The goal to be persisted.
    */
-  saveGoal(goal : Goal) : Observable<string>;
+  saveGoal(goal : Goal) : Observable<any>;
 
   /**
    * Removes a given goal permanently.
    * 
    * @param the goal to be removed.
    */
-  deleteGoal(goal : Goal) : Observable<string>;
+  deleteGoal(goal : Goal) : Observable<any>;
 }

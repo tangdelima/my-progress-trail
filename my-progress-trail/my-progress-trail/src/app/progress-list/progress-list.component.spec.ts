@@ -24,5 +24,6 @@ describe('ProgressListComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+    pending();
   });
 });
