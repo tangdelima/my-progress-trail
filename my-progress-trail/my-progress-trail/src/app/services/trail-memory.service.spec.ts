@@ -14,7 +14,7 @@ describe('TrailMemoryService', () => {
       service.getTrails().subscribe(res => {
         let trails = res._values;
         trails.forEach( trail => {
-          service.removeTrail(trail).subscribe();
+          service.deleteTrail(trail).subscribe();
         });
       });
     }
@@ -23,14 +23,55 @@ describe('TrailMemoryService', () => {
     if(service){
       (<Trail[]>
         [
-          new Trail("Test 1"),
-          new Trail("Test 2"),
-          new Trail("Test 3")
+          new Trail("Trail Test 1"),
+          new Trail("Trail Test 2"),
+          new Trail("Trail Test 3")
         ]
       ).forEach( trail => {
         service.saveTrail(trail).subscribe();
       } );
     }
+  };
+  var setup = function(){
+    cleanUpRepository();
+    loadTrails();
+  };
+
+  /**
+   * Find any trail in the repository
+   * Must be called from an async zone.
+   */
+  var findAnyTrail = function(){
+    let trail;
+    service.getTrails().subscribe(res => {
+      let trails = res._values;
+      trail = trails[0];
+    });
+    return trail;
+  };
+
+  /**
+   * Count how many trails are in the repository.
+   * Must be called from an async zone.
+   */
+  var countTrails = function(){
+    let count : number;
+    service.getTrails().subscribe(res => {
+      count = res._values.length;
+    }, error => {}, () => {});
+    return count;    
+  }
+
+  /**
+   * Count how many goals are in the repository.
+   * Must be called from an async zone.
+   */
+  var countGoals = function(){
+    let count : number;
+    service.getGoals().subscribe(res => {
+      count = res._values.length;
+    }, error => {}, () => {});
+    return count; 
   };
 
   beforeEach(() => {
@@ -45,23 +86,16 @@ describe('TrailMemoryService', () => {
   });
 
   it('should save a trail', async(() => {
-    let nTrails : number;
-    service.getTrails().subscribe(res => {
-      nTrails = res._values.length;
-    }, error => {}, () => {});
-    
+    let nTrails = countTrails();
     service.saveTrail(service.createTrail('test.1')).subscribe(res => console.log(res._msg));
-    let nTrailsResult : number;
-    service.getTrails().subscribe(res => {
-      nTrailsResult = res._values.length;
-    });
+    let nTrailsResult = countTrails();
+    
     expect( nTrailsResult ).toBe( nTrails + 1 );
   }));
 
 
   it('should return all saved trails', async(() => {
-    cleanUpRepository();
-    loadTrails();
+    setup();
     let trails = [];
     service.getTrails().subscribe( res => {
       if(res.success){
@@ -73,21 +107,71 @@ describe('TrailMemoryService', () => {
     expect(trails.length).toBe(3);
   }));
   
-  it('should return an expected saved trail', () => {
-    pending();
-  });
+  it('should return an expected saved trail', async(() => {
+    cleanUpRepository();
+    let trail = service.createTrail('Trail Returned Test');
+    service.saveTrail(trail).subscribe( res => {
+      if (res._success) {
+        trail = res._values[0];
+      } else {
+        console.error(res._msg);
+      }
+    } );
+    let newTrail = null;
+    service.getTrail(trail.id).subscribe(res=>{
+      if (res._success) {
+        newTrail = res._values[0];
+      } else {
+        console.error(res._msg);
+      }
+    });
+    expect(newTrail.id).toBe(trail.id)
+  }));
 
-  it('should edit an expected trail', () => {
-    pending();
-  });
+  it('should edit an expected trail', async(() => {
+    setup();
+    let trail = findAnyTrail();
+    let trailId = trail.id;
+    let trailName = trail.name;    
+    trail.name = trailName + " edited";
 
-  it('should remove a given trail', () => {
-    pending();
-  });
+    service.saveTrail(trail).subscribe();
 
-  it('should create a goal', () => {
-    pending();
-  });
+    let newTrail = null;
+    service.getTrail(trailId).subscribe(res => {
+      newTrail = res._values[0];
+    });
+
+    expect(newTrail.id).toEqual(trailId);
+    expect(newTrail.name).toEqual(trailName + " edited");
+  }));
+
+  it('should remove a given trail', async(() => {
+    setup();
+    let trail = <Trail>findAnyTrail();
+    let countBefore = countTrails();
+    let removedTrail;
+
+    service.deleteTrail(trail).subscribe( res => {
+      if (res._success) {
+        removedTrail = res._values[0];
+      } else {
+        console.error(res._msg);
+      }
+    });
+    let countAfter = countTrails();
+    expect(countAfter).toBe(countBefore-1);
+    expect(removedTrail).toEqual(trail);
+  }));
+
+  it('should create a goal', async(() => {
+    let nGoals = countGoals();
+    service.saveGoal(service.createGoal('Goal Test 1')).subscribe(res => {
+      console.log(res._msg);
+    });
+    let nGoalsResult = countGoals();
+    expect(nGoalsResult).toBe(nGoals+1);
+  }));
 
   it('should attach a goal to a trail', () => {
     pending();

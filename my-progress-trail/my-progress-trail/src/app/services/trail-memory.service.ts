@@ -24,10 +24,15 @@ export class TrailMemoryService implements TrailService{
     });
   }  
 
-  getTrail(id : number) : Observable<Trail> {
-    let trail : Trail = null;
-
-    return null;
+  getTrail(id : number) : Observable<Trail> {    
+    return Observable.create( observer => {
+      let trail = this.repository.getTrail(id);
+      let response = new TrailRepositoryResponse()
+                        .success(true)
+                        .values([trail]);
+      observer.next(response);
+      observer.complete();
+    } );
   }
 
   createTrail(name : string) : Trail {
@@ -38,8 +43,13 @@ export class TrailMemoryService implements TrailService{
   saveTrail(trail : Trail) : Observable<any> {
     return Observable.create((observer : Observer<any>) => {
       try{
-        this.repository.addTrail(trail);
+        if (trail.id) {
+          this.repository.updateTrail(trail);
+        } else {
+          this.repository.addTrail(trail);
+        }
         let response = new TrailRepositoryResponse()
+                        .values([trail])
                         .msg('Trail Added.')
                         .success(true); 
         observer.next(response);
@@ -53,7 +63,7 @@ export class TrailMemoryService implements TrailService{
   deleteTrail(trail : Trail) : Observable<any> {
     return Observable.create((observer:Observer<any>) => {
       try{
-        let removed = this.repository.removeTrail(trail);
+        let removed = this.repository.deleteTrail(trail);
         let response = new TrailRepositoryResponse()
                         .values([removed])
                         .success(true);
@@ -70,13 +80,35 @@ export class TrailMemoryService implements TrailService{
    *** service methods to Goal handling.  **********************
    */
 
-  createGoal(name: string, imgUrl?: string) : Goal { return null;}
+  createGoal(name: string, imgUrl?: string) : Goal { 
+    let goal = new Goal(name);
+    if(imgUrl) goal.imageUrl = imgUrl;
+    return goal;
+  }
 
-  getGoals(trailId : number) : Observable<Goal[]>{ return null; }
+  getGoals(trailId : number) : Observable<Goal[]>{ 
+    return Observable.create(observer => {
+      let goals = this.repository.goalsList;
+      let response = new TrailRepositoryResponse()
+                      .success(true)
+                      .values(goals);
+      observer.next(response);
+      observer.complete();
+    }); 
+  }
 
   getAllGoals() : Observable<Goal[]>{ return null; }
 
-  saveGoal(goal : Goal) : Observable<string> { return null; }
+  saveGoal(goal : Goal) : Observable<string> { 
+    return Observable.create(observer => {
+      this.repository.addGoal(goal);
+      let response = new TrailRepositoryResponse()
+                      .msg('Goal created with success')
+                      .success(true);
+      observer.next(response);
+      observer.complete();
+    });
+   }
 
   deleteGoal(goal : Goal) : Observable<string>{ return null; }
 
@@ -91,8 +123,10 @@ export class TrailMemoryService implements TrailService{
 
 class MockedTrailsRepository{
   constructor(
-    private _key : number = 1,
-    private _trailsList : Trail[] = []
+    private _trailKey : number = 1,
+    private _goalKey  : number = 1,
+    private _trailsList : Trail[] = [],
+    private _goalsList  :  Goal[] = []
   ){}
 
   public get trailsList() : Trail[] {
@@ -100,12 +134,35 @@ class MockedTrailsRepository{
   }
 
   public addTrail(trail : Trail){
-    trail.id = this._key++;
+    trail.id = this._trailKey++;
     this._trailsList.push(trail);
   }
 
-  public removeTrail(trail : Trail) : Trail {
+  public deleteTrail(trail : Trail) : Trail {
     return this._trailsList.splice(this._trailsList.indexOf(trail),1)[0];    
+  }
+
+  public getTrail(id : number){
+    return this._trailsList.find(trail=>{
+      return trail.id == id;
+    });
+  }
+
+  public updateTrail(trail : Trail) : boolean {
+    let trail_index = this._trailsList.indexOf(trail);    
+    if (trail_index < 0) return false;
+
+    this._trailsList[this._trailsList.indexOf(trail)] = trail;
+    return true;
+  }
+
+  public get goalsList(){
+    return this._goalsList;
+  }
+
+  public addGoal(goal : Goal){
+    goal.id = this._goalKey++;
+    this._goalsList.push(goal);
   }
 }
 
