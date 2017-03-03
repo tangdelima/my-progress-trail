@@ -3,14 +3,16 @@ import { Goal } from './goal';
 export class Trail {
 
     private _completed : boolean = false;
+    private _goals : Goal[] = [];
 
     constructor(
         private _name: string,
         private _id?: number,
         private _status?: string,
-        private _goals?: Goal[]
+        _goals?: Goal[]
     ){
-        if (_goals) { 
+        if (_goals) {
+            this._goals = _goals;
             this.evaluatesCompletion();
         }
     }
@@ -44,7 +46,7 @@ export class Trail {
     }
 
     addGoal(goal : Goal) : void{        
-        this._goals.push();
+        this._goals.push(goal);
     }
 
     get completed() : boolean {
