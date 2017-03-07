@@ -88,18 +88,26 @@ export class TrailMemoryService implements TrailService{
 
   getGoals(trailId : number) : Observable<Goal[]>{ 
     return Observable.create(observer => {
-      let goals = this.repository.goalsList;
+      let trail = this.repository.getTrail(trailId);      
       let response = new TrailRepositoryResponse()
                       .success(true)
-                      .values(goals);
+                      .values(trail.goals);
       observer.next(response);
       observer.complete();
     }); 
   }
 
-  getAllGoals() : Observable<Goal[]>{ return null; }
+  getAllGoals() : Observable<Goal[]>{ 
+    return Observable.create( observer => {
+          let response = new TrailRepositoryResponse()
+                    .success(true)
+                    .values(this.repository.goalsList);
+          observer.next(response);
+          observer.complete();
+    } ); 
+  }
 
-  saveGoal(goal : Goal) : Observable<string> { 
+  saveGoal(goal : Goal) : Observable<any> { 
     return Observable.create(observer => {
       this.repository.addGoal(goal);
       let response = new TrailRepositoryResponse()
@@ -108,6 +116,50 @@ export class TrailMemoryService implements TrailService{
       observer.next(response);
       observer.complete();
     });
+   }
+
+   addGoal(trail : Trail, goal : Goal){
+     return Observable.create( observer => {
+      let all_goals = this.repository.goalsList;
+      if (!goal.id) {
+        try{
+          this.repository.addGoal(goal);
+        } catch(e){
+          let response = new TrailRepositoryResponse()
+                          .success(false)
+                          .msg(e.message);
+          observer.error(response);
+          observer.complete();
+          return;
+        }
+      }
+        trail.addGoal(goal);
+
+      if(!trail.id){
+        this.repository.addTrail(trail);
+      } else {
+        this.repository.updateTrail(trail);
+      }
+
+      let response = new TrailRepositoryResponse()
+                      .success(true)
+                      .msg('Goal added to trail and persisted.');
+      observer.next(response);
+      observer.complete();
+     } );
+   };
+
+   removeGoal(trail : Trail, goal : Goal) {
+     return Observable.create(observer => {
+      trail.removeGoal(goal);
+      this.repository.updateTrail(trail);
+
+      let response = new TrailRepositoryResponse()
+                          .success(true)
+                          .msg("Goal sucessfully removed!");
+      observer.next(response);
+      observer.complete();
+     });     
    }
 
   deleteGoal(goal : Goal) : Observable<string>{ return null; }
@@ -161,8 +213,17 @@ class MockedTrailsRepository{
   }
 
   public addGoal(goal : Goal){
+    if ( this.isGoalDuplicated(goal) ) {
+      throw new Error("The goal to be inserted was duplicated.");
+    }
     goal.id = this._goalKey++;
     this._goalsList.push(goal);
+  }
+
+  private isGoalDuplicated(goal : Goal) : boolean {
+    return this._goalsList.some( _goal => {
+      return goal.name == _goal.name
+    } );
   }
 }
 

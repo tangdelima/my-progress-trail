@@ -7,7 +7,9 @@ import { Trail, Goal } from './../objects';
 
 describe('TrailMemoryService', () => {
 
-  var service;
+  const DUPLICATED_GOAL_ERROR_MSG = "The goal to be inserted was duplicated.";
+
+  var service;  
 
   var cleanUpRepository = function(){
     if(service){
@@ -20,12 +22,18 @@ describe('TrailMemoryService', () => {
     }
   };
   var loadTrails = function(){
-    if(service){
+    if(service){      
       (<Trail[]>
         [
           new Trail("Trail Test 1"),
           new Trail("Trail Test 2"),
-          new Trail("Trail Test 3")
+          new Trail("Trail Test 3"),
+          new Trail("Trail with Goals",
+                    undefined,
+                    "",
+                    [ 
+                      new Goal('Goal 1'), new Goal('Goal 2') 
+                    ])
         ]
       ).forEach( trail => {
         service.saveTrail(trail).subscribe();
@@ -49,6 +57,20 @@ describe('TrailMemoryService', () => {
     });
     return trail;
   };
+
+  /**
+   * Find a trail by its name
+   * Must be called from an async zone.
+   * @param name the name of the trail to be found.
+   */
+  var findTrailByName = function(name : string){
+    let trail;
+    service.getTrails().subscribe(res => {
+      let trails = res._values;
+      trail = trails.find(value => name == (<Trail>value).name);
+    });
+    return trail;
+  }
 
   var countAsynchronousList = function(asyngResource, callbackObj){
     let count : number;
@@ -88,7 +110,7 @@ describe('TrailMemoryService', () => {
         console.error(res._msg);
       }
     });
-    expect(trails.length).toBe(3);
+    expect(trails.length).toBe(4);
   }));
   
   it('should return an expected saved trail', async(() => {
@@ -149,11 +171,11 @@ describe('TrailMemoryService', () => {
   }));
 
   it('should create a goal', async(() => {
-    let nGoals = countAsynchronousList(service.getGoals, service);
+    let nGoals = countAsynchronousList(service.getAllGoals, service);
     service.saveGoal(service.createGoal('Goal Test 1')).subscribe(res => {
       console.log(res._msg);
     });
-    let nGoalsResult = countAsynchronousList(service.getGoals, service);
+    let nGoalsResult = countAsynchronousList(service.getAllGoals, service);
     expect(nGoalsResult).toBe(nGoals+1);
   }));
 
@@ -164,8 +186,7 @@ describe('TrailMemoryService', () => {
   
     let nGoalsBefore = (<Goal[]>trail.goals).length;
 
-    trail.addGoal(service.createGoal('Test Goal 1'));
-    service.saveTrail(trail);
+    service.addGoal(trail, service.createGoal('Goal Test 1')).subscribe();
 
     service.getTrail(trailId).subscribe( res => {
       trail = res._values[0];
@@ -174,15 +195,61 @@ describe('TrailMemoryService', () => {
     expect(nGoalsAfter).toBe(nGoalsBefore+1);
   }));
 
-  it('should return an error if the user tries to atach a goal previously added.', ()=>{
-    pending();
-  });
+  it('should return an error if the user tries to atach a goal previously added.', async(()=>{
+    setup();
+    let trail = findAnyTrail();
+    let trailId = trail.id;
 
-  it('should remove a goal froma a trail', () => {
+    service.addGoal(trail, service.createGoal('Test Goal 1')).subscribe();
+    let nGoalsBefore = (<Goal[]>trail.goals).length;
+
+    let operationSuccess : boolean;
+    let errorMessage : string;
+
+    service.addGoal(trail, service.createGoal('Test Goal 1')).subscribe(
+      res => {
+        operationSuccess = res._success;
+      },
+      error => {
+        operationSuccess = error._success;
+        errorMessage = error._msg;
+      }
+    );
+
+    service.getTrail(trailId).subscribe( res => {
+      trail = res._values[0];
+    } );    
+    let nGoalsAfter = (<Goal[]>trail.goals).length;
+
+    expect(nGoalsAfter).toBe(nGoalsBefore);
+    expect(operationSuccess).toBe(false);
+    expect(errorMessage).toEqual(DUPLICATED_GOAL_ERROR_MSG);
+  }));
+
+  it('should remove a goal from a trail', async(() => {
+    setup();
+    let trail = findTrailByName("Trail with Goals");
+    let goal = trail.goals[0];
+    let nGoalsBefore = trail.goals.length;
+
+    let removedGoal : Goal;
+    service.removeGoal(trail, goal).subscribe();
+
+    trail = findTrailByName("Trail with Goals");
+    let nGoalsAfter = trail.goals.length;
+    
+    expect(nGoalsAfter).toBe(nGoalsBefore-1);
+  }));
+
+  it('should delete a goal', () => {
     pending();
-  });
+  })
 
   it('should finish a goal', () => {
+    pending();
+  });
+
+  it('should not be possible to edit finished Goals', () => {
     pending();
   });
 

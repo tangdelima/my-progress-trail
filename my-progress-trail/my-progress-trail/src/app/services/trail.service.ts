@@ -88,6 +88,22 @@ export interface TrailService {
   saveGoal(goal : Goal) : Observable<any>;
 
   /**
+   * Inserts a persisted goal to a trail.
+   * 
+   * @param trail the trail in which the goal shall be inserted.
+   * @param goal  the goal to be inserted.
+   */
+  addGoal(trail : Trail, goal : Goal) : void;
+
+  /**
+   * Removes a persisted goal to a trail.
+   * 
+   * @param trail the trail in which the goal shall be removed.
+   * @param goal  the goal to be removed.
+   */
+  removeGoal(trail : Trail, goal : Goal): void
+
+  /**
    * Removes a given goal permanently.
    * 
    * @param the goal to be removed.

@@ -60,7 +60,7 @@ export class Trail {
      * The goal to be removed.
      *  */ 
     removeGoal(goal : Goal) : Goal{
-        return this._goals.splice(this._goals.indexOf(goal))[0];
+        return this._goals.splice(this._goals.indexOf(goal),1)[0];
     }
 
     /**
