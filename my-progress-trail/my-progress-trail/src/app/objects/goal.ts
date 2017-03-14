@@ -5,8 +5,7 @@ export class Goal {
         private _id?: number,
         private _status?: string,
         private _imageUrl?: string,
-        private _finishedOn?: Date,
-        private _order?: number){}
+        private _finishedOn?: Date){}
 
     get id() :  number{
         return this._id;
@@ -37,11 +36,5 @@ export class Goal {
     }
     set finishedOn(finishedOn : Date) {
         this._finishedOn = finishedOn;
-    }
-    get order() : number {
-        return this._order;
-    }
-    set order(order : number) {
-        this._order = order;
     }
 }

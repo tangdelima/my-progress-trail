@@ -97,6 +97,18 @@ export class TrailMemoryService implements TrailService{
     }); 
   }
 
+  getGoal(id: number) : Observable<any> {
+    return Observable.create( observer => {
+      let goal = this.repository.getGoal(id);
+
+      let response = new TrailRepositoryResponse()
+                      .success(true)
+                      .values([goal]);
+      observer.next(response);
+      observer.complete(); 
+    });
+  }
+
   getAllGoals() : Observable<any>{ 
     return Observable.create( observer => {
           let response = new TrailRepositoryResponse()
@@ -192,6 +204,19 @@ export class TrailMemoryService implements TrailService{
     } ); 
   }
 
+  finishGoal(goal: Goal) {
+    return Observable.create(observer => {
+      goal.finishedOn = new Date();
+      this.repository.updateGoal(goal);
+
+      let response = new TrailRepositoryResponse()
+                      .success(true)
+                      .msg('Goal finished successfully on ' + goal.finishedOn);
+      observer.next(response);
+      observer.complete();
+    });
+  }
+
   errorMessage( _msg? : string ){
     return new TrailRepositoryResponse()
             .msg(_msg ? _msg : "Internal Error: Could not execute action.")
@@ -240,12 +265,26 @@ class MockedTrailsRepository{
     return this._goalsList;
   }
 
+  public getGoal(id : number) {
+    return this._goalsList.find( goal => {
+      return goal.id == id; 
+    });
+  }
+
   public addGoal(goal : Goal){
     if ( this.isGoalDuplicated(goal) ) {
       throw new Error("The goal to be inserted was duplicated.");
     }
     goal.id = this._goalKey++;
     this._goalsList.push(goal);
+  }
+
+  public updateGoal(goal : Goal) : boolean {
+    let goal_index = this._goalsList.indexOf(goal);    
+    if (goal_index < 0) return false;
+
+    this._goalsList[this._goalsList.indexOf(goal)] = goal;
+    return true;
   }
 
   public deleteGoal(goal : Goal) : Goal{

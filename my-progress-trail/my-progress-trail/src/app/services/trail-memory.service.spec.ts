@@ -276,9 +276,26 @@ describe('TrailMemoryService', () => {
     expect(nGoalsResult).toBe(nGoals-1);
   })
 
-  it('should finish a goal', () => {
-    pending();
-  });
+  it('should finish a goal', async(() => {
+    let goal = service.createGoal('Finished Goal');
+    service.saveGoal(goal).subscribe();
+    
+    service.finishGoal(goal).subscribe(
+      res => {
+        console.log(res._msg);
+      }
+    );
+
+    let finishedGoal : Goal;
+    service.getGoal(goal.id).subscribe(
+      res => {
+        finishedGoal = res._values[0];
+      }
+    );
+
+    expect(goal.finishedOn).not.toBeUndefined();
+    expect(finishedGoal.finishedOn).not.toBeUndefined();
+  }));
 
   it('should not be possible to edit finished Goals', () => {
     pending();
@@ -293,6 +310,18 @@ describe('TrailMemoryService', () => {
   });
 
   it('should only take off trail completed status when one of its goals is marked unfinished', () => {
+    pending();
+  });
+
+  it('goals should be fetched from a trail in a defined order', () => {
+    pending();
+  });
+
+  it('goals should be fetched from different trails in an order defined by each trail', () => {
+    pending();
+  });
+
+  it('the goals defined order should be changeable', () => {
     pending();
   });
 

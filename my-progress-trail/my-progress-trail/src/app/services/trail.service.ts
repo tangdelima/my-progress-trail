@@ -74,6 +74,12 @@ export interface TrailService {
   getGoals(trailId : number) : Observable<any>;
 
   /**
+   * Get a goal by given id.
+   * @param id the goal id
+   */
+  getGoal(id : number) : Observable<any>;
+
+  /**
    * Finds all Goals.
    * 
    * @return An array with all goals in no specified order.
@@ -111,4 +117,10 @@ export interface TrailService {
    * @param the goal to be removed.
    */
   deleteGoal(goal : Goal) : Observable<any>;
+
+  /**
+   * This method finishes a goal. When a goal is finished every trail that own this goal
+  //  * should be evaluated to be completed or not.
+   */
+  finishGoal(goal) : void;
 }
