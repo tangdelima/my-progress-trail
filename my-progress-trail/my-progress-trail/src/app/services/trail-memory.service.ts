@@ -13,7 +13,7 @@ export class TrailMemoryService implements TrailService{
     this.repository = new MockedTrailsRepository();
   }
 
-  getTrails() : Observable<Trail[]> {
+  getTrails() : Observable<any> {
     return Observable.create((observer) => {
       let trails = this.repository.trailsList;
       let response = new TrailRepositoryResponse()
@@ -24,7 +24,7 @@ export class TrailMemoryService implements TrailService{
     });
   }  
 
-  getTrail(id : number) : Observable<Trail> {    
+  getTrail(id : number) : Observable<any> {    
     return Observable.create( observer => {
       let trail = this.repository.getTrail(id);
       let response = new TrailRepositoryResponse()
@@ -86,7 +86,7 @@ export class TrailMemoryService implements TrailService{
     return goal;
   }
 
-  getGoals(trailId : number) : Observable<Goal[]>{ 
+  getGoals(trailId : number) : Observable<any>{ 
     return Observable.create(observer => {
       let trail = this.repository.getTrail(trailId);      
       let response = new TrailRepositoryResponse()
@@ -97,7 +97,7 @@ export class TrailMemoryService implements TrailService{
     }); 
   }
 
-  getAllGoals() : Observable<Goal[]>{ 
+  getAllGoals() : Observable<any>{ 
     return Observable.create( observer => {
           let response = new TrailRepositoryResponse()
                     .success(true)
@@ -162,7 +162,35 @@ export class TrailMemoryService implements TrailService{
      });     
    }
 
-  deleteGoal(goal : Goal) : Observable<string>{ return null; }
+  deleteGoal(goal : Goal) : Observable<any>{ 
+    return Observable.create( observer => {
+      // Find all trails to remove the goal to be deleted from it.
+      this.getTrails().subscribe( 
+        res => {
+          <TrailRepositoryResponse>res._values.forEach(trail => {
+            let rmGoal = (<Trail>trail).goals.find(fngoal => {
+              return fngoal.id == goal.id;
+            });
+            if (rmGoal){
+              trail.removeGoal(rmGoal);
+            }
+          });
+
+          let removed = this.repository.deleteGoal(goal);
+          let response = new TrailRepositoryResponse()
+                          .success(true)
+                          .values([removed]);
+          observer.next(response);
+          observer.complete();
+        },
+        error => {
+          let response = this.errorMessage('Error trying to remove goal.');
+          observer.error(response);
+          observer.complete();
+        }
+       );
+    } ); 
+  }
 
   errorMessage( _msg? : string ){
     return new TrailRepositoryResponse()
@@ -218,6 +246,10 @@ class MockedTrailsRepository{
     }
     goal.id = this._goalKey++;
     this._goalsList.push(goal);
+  }
+
+  public deleteGoal(goal : Goal) : Goal{
+    return this._goalsList.splice(this._goalsList.indexOf(goal),1)[0];
   }
 
   private isGoalDuplicated(goal : Goal) : boolean {

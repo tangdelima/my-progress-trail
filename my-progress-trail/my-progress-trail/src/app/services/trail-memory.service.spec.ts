@@ -21,8 +21,12 @@ describe('TrailMemoryService', () => {
       });
     }
   };
-  var loadTrails = function(){
-    if(service){      
+  var loadTrails = function(){    
+    if(service){
+      let goal1 = service.createGoal('Goal 1');
+      let goal2 = service.createGoal('Goal 2');
+      service.saveGoal(goal1).subscribe();
+      service.saveGoal(goal2).subscribe();
       (<Trail[]>
         [
           new Trail("Trail Test 1"),
@@ -32,7 +36,7 @@ describe('TrailMemoryService', () => {
                     undefined,
                     "",
                     [ 
-                      new Goal('Goal 1'), new Goal('Goal 2') 
+                      goal1, goal2 
                     ])
         ]
       ).forEach( trail => {
@@ -241,8 +245,35 @@ describe('TrailMemoryService', () => {
     expect(nGoalsAfter).toBe(nGoalsBefore-1);
   }));
 
+  it('goal should not be deleted even if there\'s no trail owning it', async(()=>{
+    setup();
+    let trail = findTrailByName("Trail with Goals");
+    let goal = trail.goals[0];
+    let nGoalsBefore = countAsynchronousList(service.getAllGoals, service);
+
+    let removedGoal : Goal;
+    service.removeGoal(trail, goal).subscribe();
+
+    trail = findTrailByName("Trail with Goals");
+    let nGoalsAfter = countAsynchronousList(service.getAllGoals, service);;
+    
+    expect(nGoalsAfter).toBe(nGoalsBefore);    
+  }));
+
   it('should delete a goal', () => {
-    pending();
+    setup();
+    let trail = findTrailByName("Trail with Goals");
+    let goal = trail.goals[0];
+    let nGoals = countAsynchronousList(service.getAllGoals, service);
+    
+    let removedGoal;
+    service.deleteGoal(goal).subscribe( res => { 
+      removedGoal = res._values[0];
+    });
+    expect(removedGoal).toEqual(goal);
+
+    let nGoalsResult = countAsynchronousList(service.getAllGoals, service);
+    expect(nGoalsResult).toBe(nGoals-1);
   })
 
   it('should finish a goal', () => {

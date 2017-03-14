@@ -15,7 +15,7 @@ export interface TrailService {
    * 
    * @returns An array containing all trails.
    */
-  getTrails() : Observable<Trail[]>;
+  getTrails() : Observable<any>;
 
   /**
    * Finds an Trail by id.
@@ -24,7 +24,7 @@ export interface TrailService {
    * 
    * @returns The trail specified or null if no trail is found. 
    */
-  getTrail(id : number) : Observable<Trail>;
+  getTrail(id : number) : Observable<any>;
 
   /**
    * Creates a new Trail.
@@ -71,14 +71,14 @@ export interface TrailService {
    * 
    * @return An array containing all goals of the given trail. Ordered by the order of execution.
    */
-  getGoals(trailId : number) : Observable<Goal[]>;
+  getGoals(trailId : number) : Observable<any>;
 
   /**
    * Finds all Goals.
    * 
    * @return An array with all goals in no specified order.
    */
-  getAllGoals() : Observable<Goal[]>;
+  getAllGoals() : Observable<any>;
 
   /**
    * Persistis a given Goal, if the goal already exists it will be updated.
@@ -104,7 +104,9 @@ export interface TrailService {
   removeGoal(trail : Trail, goal : Goal): void
 
   /**
-   * Removes a given goal permanently.
+   * Removes a given goal permanently. If any trail has this goal attached 
+   * it will be automatically removed. Any checks avoiding this behavior should be made
+   * by client.
    * 
    * @param the goal to be removed.
    */
