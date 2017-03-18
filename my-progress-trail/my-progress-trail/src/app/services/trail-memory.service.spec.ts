@@ -8,6 +8,7 @@ import { Trail, Goal } from './../objects';
 describe('TrailMemoryService', () => {
 
   const DUPLICATED_GOAL_ERROR_MSG = "The goal to be inserted was duplicated.";
+  const CANNOT_EDIT_FINISHED_GOAL = "Cannot update finished goals.";
 
   var service;  
 
@@ -74,6 +75,20 @@ describe('TrailMemoryService', () => {
       trail = trails.find(value => name == (<Trail>value).name);
     });
     return trail;
+  }
+
+  /**
+   * Find a goal by its name
+   * Must be called from an async zone.
+   * @param name the name of the goal to be found.
+   */
+  var findGoalByName = function(name : string){
+    let goal;
+    service.getAllGoals().subscribe(res => {
+      let goals = res._values;
+      goal = goals.find(value => name == (<Goal>value).name);
+    });
+    return goal;
   }
 
   var countAsynchronousList = function(asyngResource, callbackObj){
@@ -341,21 +356,80 @@ describe('TrailMemoryService', () => {
     expect(finishedGoal.finishedOn).not.toBeUndefined();
   }));
 
-  it('should not be possible to edit finished Goals', () => {
-    pending();
-  });
+  it('should not be possible to edit finished Goals', async(() => {
+    cleanUpRepository();
+    let nameBeforeFinish = 'Goal';
+    let goal = service.createGoal(nameBeforeFinish);
+    service.saveGoal(goal).subscribe();
+    
+    service.finishGoal(goal).subscribe(
+      res => {
+        console.log(res._msg);
+      }
+    );
 
-  it('should complete a trail when all goals finished', () => {
-    pending();
-  });
+    let errorMsg : string;
+    try {
+      goal.name = "try to edit Goal"
+    } catch(error){
+      errorMsg = error.message;
+    }
 
-  it('should only have completed status when all goals are finished', () => {
-    pending();
-  });
+    expect(errorMsg).not.toBeUndefined();
+    expect(errorMsg).toEqual(CANNOT_EDIT_FINISHED_GOAL);
+    expect(goal.name).toEqual(nameBeforeFinish);
+  }));
 
-  it('should only take off trail completed status when one of its goals is marked unfinished', () => {
-    pending();
-  });
+  it('should complete a trail when all goals finished', async(() => {
+    cleanUpRepository();
+    let trail : Trail = service.createTrail('Trail');
+    let goal1 = service.createGoal('Goal 1');
+    let goal2 = service.createGoal('Goal 2');
+
+    service.addGoal(trail, goal1).subscribe();
+    service.addGoal(trail, goal2).subscribe();
+
+    expect(trail.completed).toBeFalsy();
+
+    service.finishGoal(goal1).subscribe();
+    expect(trail.completed).toBeFalsy();
+
+    service.finishGoal(goal2).subscribe();
+    expect(trail.completed).toBeTruthy();
+  }));
+
+  it('should only take off trail completed status when one of its goals is marked unfinished', async(() => {
+    cleanUpRepository();
+    let trail : Trail = service.createTrail('Trail');
+    let goal1 = service.createGoal('Goal 1');
+    let goal2 = service.createGoal('Goal 2');
+
+    service.addGoal(trail, goal1).subscribe();
+    service.addGoal(trail, goal2).subscribe();
+    service.finishGoal(goal1).subscribe();
+    service.finishGoal(goal2).subscribe();
+
+    service.finishGoal(goal2).subscribe();
+    expect(trail.completed).toBeTruthy();
+    service.finishGoal(goal2, false).subscribe();
+    expect(trail.completed).toBeFalsy();
+  }));
+
+  it('trail should lose completed status when an unfinised goal is added', async(() => {
+    cleanUpRepository();
+    let trail : Trail = service.createTrail('Trail');
+    let goal1 = service.createGoal('Goal 1');
+    service.addGoal(trail, goal1).subscribe();
+
+    expect(trail.completed).toBeFalsy();
+
+    service.finishGoal(goal1).subscribe();
+    expect(trail.completed).toBeTruthy();
+
+    let goal2 = service.createGoal('Goal 2');    
+    service.addGoal(trail, goal2).subscribe();
+    expect(trail.completed).toBeFalsy();
+  }));
 
   it('goals should be fetched from a trail in a defined order', () => {
     pending();

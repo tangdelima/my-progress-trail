@@ -151,6 +151,7 @@ export class TrailMemoryService implements TrailService{
         }
       }
       trail.addGoal(goal);
+      trail.evaluatesCompletion();
 
       if(!trail.id){
         this.repository.insertTrail(trail);
@@ -209,10 +210,20 @@ export class TrailMemoryService implements TrailService{
     } ); 
   }
 
-  finishGoal(goal: Goal) {
+  finishGoal(goal: Goal, shouldFinish? : boolean) {
     return Observable.create(observer => {
-      goal.finishedOn = new Date();
+      if (shouldFinish == undefined || shouldFinish == true) {
+        goal.finishedOn = new Date();
+      } else {
+        goal.finishedOn = undefined;
+      }
       this.repository.updateGoal(goal);
+      let affectedTrails = this.affectedTrails(goal);
+      if (affectedTrails && affectedTrails.length > 0) {
+        affectedTrails.forEach(trail => {
+          trail.evaluatesCompletion();
+        });
+      }
 
       let response = new TrailRepositoryResponse()
                       .success(true)
@@ -222,13 +233,22 @@ export class TrailMemoryService implements TrailService{
     });
   }
 
-  errorMessage( _msg? : string ){
+  private errorMessage( _msg? : string ){
     return new TrailRepositoryResponse()
             .msg(_msg ? _msg : "Internal Error: Could not execute action.")
             .success(false)
             .toJSON();  
   }
 
+  private affectedTrails( goal : Goal ): Trail[]{
+    return this.repository.trailsList.filter(trail => {
+      return ( 
+        trail.goals.filter( curGoal => {
+          return curGoal.id == goal.id;
+        }).length > 0
+      );
+    });
+  }
 }
 
 class MemoryTrailsRepository{
