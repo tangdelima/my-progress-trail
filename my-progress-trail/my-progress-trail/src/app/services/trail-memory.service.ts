@@ -8,9 +8,9 @@ import { Trail, Goal } from '../objects';
 @Injectable()
 export class TrailMemoryService implements TrailService{
 
-  repository : MockedTrailsRepository;
+  repository : MemoryTrailsRepository;
   constructor() {
-    this.repository = new MockedTrailsRepository();
+    this.repository = new MemoryTrailsRepository();
   }
 
   getTrails() : Observable<any> {
@@ -26,7 +26,7 @@ export class TrailMemoryService implements TrailService{
 
   getTrail(id : number) : Observable<any> {    
     return Observable.create( observer => {
-      let trail = this.repository.getTrail(id);
+      let trail = this.repository.findTrail(id);
       let response = new TrailRepositoryResponse()
                         .success(true)
                         .values([trail]);
@@ -46,7 +46,7 @@ export class TrailMemoryService implements TrailService{
         if (trail.id) {
           this.repository.updateTrail(trail);
         } else {
-          this.repository.addTrail(trail);
+          this.repository.insertTrail(trail);
         }
         let response = new TrailRepositoryResponse()
                         .values([trail])
@@ -88,7 +88,7 @@ export class TrailMemoryService implements TrailService{
 
   getGoals(trailId : number) : Observable<any>{ 
     return Observable.create(observer => {
-      let trail = this.repository.getTrail(trailId);      
+      let trail = this.repository.findTrail(trailId);      
       let response = new TrailRepositoryResponse()
                       .success(true)
                       .values(trail.goals);
@@ -99,7 +99,7 @@ export class TrailMemoryService implements TrailService{
 
   getGoal(id: number) : Observable<any> {
     return Observable.create( observer => {
-      let goal = this.repository.getGoal(id);
+      let goal = this.repository.findGoal(id);
 
       let response = new TrailRepositoryResponse()
                       .success(true)
@@ -121,7 +121,11 @@ export class TrailMemoryService implements TrailService{
 
   saveGoal(goal : Goal) : Observable<any> { 
     return Observable.create(observer => {
-      this.repository.addGoal(goal);
+      if ( goal.id ) {
+        this.repository.updateGoal(goal);
+      } else {
+        this.repository.insertGoal(goal);
+      }
       let response = new TrailRepositoryResponse()
                       .msg('Goal created with success')
                       .success(true);
@@ -135,7 +139,7 @@ export class TrailMemoryService implements TrailService{
       let all_goals = this.repository.goalsList;
       if (!goal.id) {
         try{
-          this.repository.addGoal(goal);
+          this.repository.insertGoal(goal);
         } catch(e){
           let response = new TrailRepositoryResponse()
                           .success(false)
@@ -145,10 +149,10 @@ export class TrailMemoryService implements TrailService{
           return;
         }
       }
-        trail.addGoal(goal);
+      trail.addGoal(goal);
 
       if(!trail.id){
-        this.repository.addTrail(trail);
+        this.repository.insertTrail(trail);
       } else {
         this.repository.updateTrail(trail);
       }
@@ -226,7 +230,7 @@ export class TrailMemoryService implements TrailService{
 
 }
 
-class MockedTrailsRepository{
+class MemoryTrailsRepository{
   constructor(
     private _trailKey : number = 1,
     private _goalKey  : number = 1,
@@ -238,7 +242,7 @@ class MockedTrailsRepository{
     return this._trailsList;
   }
 
-  public addTrail(trail : Trail){
+  public insertTrail(trail : Trail){
     trail.id = this._trailKey++;
     this._trailsList.push(trail);
   }
@@ -247,7 +251,7 @@ class MockedTrailsRepository{
     return this._trailsList.splice(this._trailsList.indexOf(trail),1)[0];    
   }
 
-  public getTrail(id : number){
+  public findTrail(id : number){
     return this._trailsList.find(trail=>{
       return trail.id == id;
     });
@@ -265,13 +269,13 @@ class MockedTrailsRepository{
     return this._goalsList;
   }
 
-  public getGoal(id : number) {
+  public findGoal(id : number) {
     return this._goalsList.find( goal => {
       return goal.id == id; 
     });
   }
 
-  public addGoal(goal : Goal){
+  public insertGoal(goal : Goal){
     if ( this.isGoalDuplicated(goal) ) {
       throw new Error("The goal to be inserted was duplicated.");
     }
