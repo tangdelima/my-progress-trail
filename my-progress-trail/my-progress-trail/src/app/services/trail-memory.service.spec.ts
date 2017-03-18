@@ -183,6 +183,50 @@ describe('TrailMemoryService', () => {
     expect(nGoalsResult).toBe(nGoals+1);
   }));
 
+  it('should edit a goal', async(() => {
+    let goal = service.createGoal('Goal');
+    service.saveGoal(goal).subscribe();
+    
+    let editedName = goal.name + ' edited'; 
+    goal.name = editedName;
+    service.saveGoal(goal).subscribe();
+
+    let goalFromService : Goal;
+    service.getGoal(goal.id).subscribe( res => {
+      goalFromService = res._values[0];
+    } );
+
+    expect(goalFromService.name).toEqual(editedName);
+  }));
+
+  it('should update shared goals from other trails when a single goal has been updated.', async(() => {
+    cleanUpRepository();
+    let goal = service.createGoal('Goal');
+    let trail1 = service.createTrail('Trail 1');
+    let trail2 = service.createTrail('Trail 2');    
+    
+    service.addGoal(trail1, goal).subscribe();
+    service.addGoal(trail2, goal).subscribe();
+
+    let persistedTrail1 : Trail;
+    let persistedTrail2 : Trail;
+
+    service.getTrail(trail1.id).subscribe( res => {
+      persistedTrail1 = res._values[0]; 
+    });
+    
+    let editedName = goal.name + ' edited';
+    persistedTrail1.goals[0].name = editedName; 
+    service.saveTrail(persistedTrail1).subscribe();
+    service.getTrail(trail2.id).subscribe( res => {
+      persistedTrail2 = res._values[0];
+    });
+
+    expect(persistedTrail1).not.toBe(persistedTrail2);
+    expect(persistedTrail2.goals[0].name).toEqual(persistedTrail1.goals[0].name);
+    expect(persistedTrail1.goals[0].name).toEqual(editedName);    
+  }));
+
   it('should attach a goal to a trail', async(() => {
     setup();
     let trail = findAnyTrail();
