@@ -101,6 +101,16 @@ export interface TrailService {
    */
   addGoal(trail : Trail, goal : Goal) : void;
 
+
+  /**
+   * Switch the order of a persisted goal from 'a' position to 'b' position.
+   * 
+   * @param trail the trail in which the goal shall be manipulated.
+   * @param a the a position of the goal.
+   * @param b the b position of the goal. 
+   */
+  switchGoalOrder(trail : Trail, a : number, b: number) : void;
+
   /**
    * Removes a persisted goal to a trail.
    * 

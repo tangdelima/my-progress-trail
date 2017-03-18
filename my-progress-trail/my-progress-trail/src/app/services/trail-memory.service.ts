@@ -233,6 +233,12 @@ export class TrailMemoryService implements TrailService{
     });
   }
 
+  switchGoalOrder(trail : Trail, a : number, b: number) {
+    let aux = trail.goals[a];
+    trail.goals[a] = trail.goals[b];
+    trail.goals[b] = aux;
+  }
+
   private errorMessage( _msg? : string ){
     return new TrailRepositoryResponse()
             .msg(_msg ? _msg : "Internal Error: Could not execute action.")

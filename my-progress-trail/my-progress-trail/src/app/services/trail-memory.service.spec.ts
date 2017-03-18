@@ -431,16 +431,78 @@ describe('TrailMemoryService', () => {
     expect(trail.completed).toBeFalsy();
   }));
 
-  it('goals should be fetched from a trail in a defined order', () => {
-    pending();
-  });
+  it('goals should be fetched from a trail in a defined order (insertion order)', async(() => {
+    cleanUpRepository();
+    let trail = service.createTrail('Trail');
+    let goal1 = service.createGoal('Goal 1');
+    let goal2 = service.createGoal('Goal 2');
+    let goal3 = service.createGoal('Goal 3');
 
-  it('goals should be fetched from different trails in an order defined by each trail', () => {
-    pending();
-  });
+    service.addGoal(trail, goal1).subscribe();
+    service.addGoal(trail, goal2).subscribe();
+    service.addGoal(trail, goal3).subscribe();
 
-  it('the goals defined order should be changeable', () => {
-    pending();
-  });
+    let trailTest1 = findTrailByName('Trail');
+    expect(trailTest1.goals[0]).toBe(goal1);
+    expect(trailTest1.goals[1]).toBe(goal2);
+    expect(trailTest1.goals[2]).toBe(goal3);
+
+    let trailTest2 = findTrailByName('Trail');
+    expect(trailTest2.goals[0]).toBe(goal1);
+    expect(trailTest2.goals[1]).toBe(goal2);
+    expect(trailTest2.goals[2]).toBe(goal3);
+  }));
+
+  it('goals should be fetched from different trails in an order defined by each trail', async(() => {
+    cleanUpRepository();
+    let trail1 = service.createTrail('Trail 1');
+    let trail2 = service.createTrail('Trail 2');
+    let goal1 = service.createGoal('Goal 1');
+    let goal2 = service.createGoal('Goal 2');
+    let goal3 = service.createGoal('Goal 3');
+
+    service.addGoal(trail1, goal1).subscribe();
+    service.addGoal(trail1, goal2).subscribe();
+    service.addGoal(trail1, goal3).subscribe();
+
+    service.addGoal(trail2, goal3).subscribe();
+    service.addGoal(trail2, goal2).subscribe();
+    service.addGoal(trail2, goal1).subscribe();
+
+    let trailTest1 = findTrailByName('Trail 1');
+    expect(trailTest1.goals[0]).toBe(goal1);
+    expect(trailTest1.goals[1]).toBe(goal2);
+    expect(trailTest1.goals[2]).toBe(goal3);
+
+    let trailTest2 = findTrailByName('Trail 2');
+    expect(trailTest2.goals[0]).toBe(goal3);
+    expect(trailTest2.goals[1]).toBe(goal2);
+    expect(trailTest2.goals[2]).toBe(goal1);
+  }));
+
+  it('the goals defined order should be changeable', async(() => {
+    cleanUpRepository();
+    let trail = service.createTrail('Trail');
+    let goal1 = service.createGoal('Goal 1');
+    let goal2 = service.createGoal('Goal 2');
+    let goal3 = service.createGoal('Goal 3');
+
+    service.addGoal(trail, goal1).subscribe();
+    service.addGoal(trail, goal2).subscribe();
+    service.addGoal(trail, goal3).subscribe();
+
+    let trailTest1 = findTrailByName('Trail');
+    expect(trailTest1.goals[0]).toBe(goal1);
+    expect(trailTest1.goals[1]).toBe(goal2);
+    expect(trailTest1.goals[2]).toBe(goal3);
+
+    service.switchGoalOrder(trail, 0, 1);
+    service.saveTrail(trail).subscribe();
+
+    let trailTest2 = findTrailByName('Trail');
+    expect(trailTest2.goals[0]).toBe(goal2);
+    expect(trailTest2.goals[1]).toBe(goal1);
+    expect(trailTest2.goals[2]).toBe(goal3);
+  }));
 
 });
