@@ -4,6 +4,7 @@ import { Observable, Observer } from 'rxjs/Rx';
 
 import { TrailService } from './trail.service';
 import { Trail, Goal } from '../objects';
+import { DuplicatedGoalInsertedError } from '../objects/exceptions';
 
 @Injectable()
 export class TrailMemoryService implements TrailService{
@@ -277,7 +278,7 @@ class MemoryTrailsRepository{
 
   public insertGoal(goal : Goal){
     if ( this.isGoalDuplicated(goal) ) {
-      throw new Error("The goal to be inserted was duplicated.");
+      throw new DuplicatedGoalInsertedError();
     }
     goal.id = this._goalKey++;
     this._goalsList.push(goal);

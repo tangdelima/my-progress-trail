@@ -1,3 +1,5 @@
+import { CannotUpdateFinishedError } from './exceptions';
+
 export class Goal {
 
     constructor(
@@ -10,6 +12,11 @@ export class Goal {
     get id() :  number{
         return this._id;
     }
+
+    /**
+     * Sets the id of goal instance when persisted.
+     * This method can be edited after the goal is set as finished.
+     */
     set id(id : number){
         this._id = id;
     }
@@ -17,18 +24,27 @@ export class Goal {
         return this._name;
     }
     set name(name : string){
+        if (!this.canUpdate()) {
+            throw new CannotUpdateFinishedError();
+        }
         this._name = name;
     }
     get status() : string {
         return this._status;
     }
     set status(status : string){
+        if (!this.canUpdate()) {
+            throw new CannotUpdateFinishedError();
+        }
         this._status = status;
     }
     get imageUrl() : string {
         return this._imageUrl;
     }
     set imageUrl(imageUrl : string) {
+        if (!this.canUpdate()) {
+            throw new CannotUpdateFinishedError();
+        }
         this._imageUrl = imageUrl;
     }
     get finishedOn() : Date {
@@ -37,4 +53,9 @@ export class Goal {
     set finishedOn(finishedOn : Date) {
         this._finishedOn = finishedOn;
     }
+
+    private canUpdate() : boolean {
+        return !this._finishedOn;
+    }
+
 }
