@@ -5,19 +5,19 @@ import { DebugElement } from '@angular/core';
 
 import { ProgressItemComponent } from './progress-item.component';
 import { TrailService } from '../../services/trail.service';
+import { TrailMemoryService } from '../../services/trail-memory.service';
 import { TrailServiceStub } from '../../../stubs/trail.service.stub';
 
 describe('ProgressItemComponent', () => {
   let component: ProgressItemComponent;
   let fixture: ComponentFixture<ProgressItemComponent>;
   let debug : DebugElement;
-  let element : HTMLElement;
   let service : TrailService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ ProgressItemComponent ],
-      providers: [ { provide: 'TrailService', useValue: TrailServiceStub } ]
+      providers: [ { provide: 'trail.service', useValue: TrailServiceStub } ]
     })
     .compileComponents();
   }));
@@ -25,9 +25,8 @@ describe('ProgressItemComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ProgressItemComponent);
     component = fixture.componentInstance;
-    debug = fixture.debugElement.query(By.css('p'));
-    element = debug.nativeElement;
-    service = TestBed.get('TrailService');
+    debug = fixture.debugElement;
+    service = TestBed.get('trail.service');
     fixture.detectChanges();
   });
 
@@ -39,12 +38,19 @@ describe('ProgressItemComponent', () => {
     expect(service).toBeTruthy();
     let goals;
     service.getAllGoals().subscribe( res => {
-      goals = res._values;
+      goals = res;
     });
     expect(goals.length).toBe(0);
   }));
 
-  it('should have a defined image loaded.', () => { pending(); })
+  it('should have a defined image loaded.', () => {    
+    let element : HTMLElement = debug.query(By.css(".item-image")).nativeElement;
+    component.image = "/tests/image.jpg";
+
+    fixture.detectChanges();
+
+    expect(element).toBeTruthy();
+  })
   
   it('should have a default image loaded.', () => { pending(); })
 

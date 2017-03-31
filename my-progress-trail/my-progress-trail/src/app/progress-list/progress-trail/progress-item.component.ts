@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Inject } from '@angular/core';
+
+import { TrailService } from '../../services/trail.service';
 
 @Component({
   selector: 'mpt-progress-item',
@@ -6,9 +8,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ProgressItemComponent implements OnInit {
 
-  constructor() { }
+  @Input() image : string;
+
+  constructor( @Inject('trail.service') private service : TrailService) { }
 
   ngOnInit() {
+
   }
 
 }
