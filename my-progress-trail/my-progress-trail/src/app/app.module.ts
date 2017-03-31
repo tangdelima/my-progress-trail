@@ -9,6 +9,7 @@ import { HeaderComponent } from './header/header.component';
 import { ProgressListComponent } from './progress-list/progress-list.component';
 import { ProgressTrailComponent } from './progress-list/progress-trail/progress-trail.component';
 import { ProgressItemComponent } from './progress-list/progress-trail/progress-item.component';
+import { TrailService } from './services/trail.service';
 import { TrailMemoryService } from './services/trail-memory.service';
 
 @NgModule({
@@ -25,7 +26,7 @@ import { TrailMemoryService } from './services/trail-memory.service';
     FormsModule,
     HttpModule
   ],
-  providers: [TrailMemoryService],
+  providers: [ { provide : 'trail.service', useClass: TrailMemoryService } ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

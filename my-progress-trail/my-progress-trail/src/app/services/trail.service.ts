@@ -1,5 +1,3 @@
-import { Injectable } from '@angular/core';
-
 import { Observable } from 'rxjs/Rx';
 
 import { Trail } from '../objects/trail';
